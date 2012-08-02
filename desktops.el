@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 19:00:25
+;; Last changed: 2012-08-02 19:03:29
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -114,18 +114,18 @@ This allows the `selected-window' to be found using `nth' on a
 
 (defun desktop:list2tree (conf)
   "Restore CONF."
-  (if (listp conf)
+  (if (desktop-split-p conf)
       (let ((newwin
-             (if (eq (car conf) 'horizontal)
+             (if (eq (desktop-split-dir conf) 'horizontal)
                  (split-window nil
-			       (floor (* (cadr conf) (frame-width)))
+			       (floor (* (desktop-split-size conf) (frame-width)))
 			       t)
                (split-window nil
-			     (floor (* (cadr conf) (frame-height)))
+			     (floor (* (desktop-split-size conf) (frame-height)))
 			     ))))
-        (desktop:list2tree (nth 2 conf))
+        (desktop:list2tree (desktop-split-child conf))
         (select-window newwin)
-        (desktop:list2tree (nth 3 conf)))
+        (desktop:list2tree (desktop-split-children conf)))
     ;; Restore window configuration
     (message "C: %S" conf)
     (let ((buffer (get-buffer (desktop-window-buffer conf))))
