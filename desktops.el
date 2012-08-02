@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 18:44:58
+;; Last changed: 2012-08-02 19:00:25
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -32,6 +32,7 @@
 (defstruct desktop-split
   dir
   size
+  child
   children)
 
 
@@ -71,12 +72,14 @@ If DIR is t the direction is horizontal, vertical otherwise."
       (let* ((dir (car tree))
 	     (children (cddr tree))
 	     (child (car children)))
-	(list (if dir 'vertical 'horizontal)
-	      (desktop:get-window-size child dir)
-	      (desktop:tree2list (car children))
-	      (if (> (length children) 2)
-		  (desktop:tree2list (cons dir (cons nil (cdr children))))
-		(desktop:tree2list (cadr children))))))))
+
+	(make-desktop-split
+	 :dir (if dir 'vertical 'horizontal)
+	 :size (desktop:get-window-size child dir)
+	 :child (desktop:tree2list child)
+	 :children (if (> (length children) 2)
+		       (desktop:tree2list (cons dir (cons nil (cdr children))))
+		     (desktop:tree2list (cadr children))))))))
 
 (defun desktop:get-window-path (tree win &optional path)
   "Retrieve WIN in the window TREE. Window position is appended to PATH.
