@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 17:22:06
+;; Last changed: 2012-08-02 18:44:16
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -42,6 +42,22 @@
   "desktop alist.")
 
 
+(defun desktop:get-window-size (win dir)
+  "return WIN window size in DIR direction. Returned value is a
+percentage of the total frame size in DIR.
+
+If DIR is t the direction is horizontal, vertical otherwise."
+  (let ((frame-size (if dir  'frame-height  'frame-width))
+	(edge1 (if dir  'cadr 'car))
+	(edge2 (if dir  'cadddr 'caddr)))
+    (/
+     (if (windowp win)
+	 (window-total-size win (not dir))
+       (let ((edge (cadr win)))
+	 (- (funcall edge2 edge) (funcall edge1 edge))))
+     (float (funcall frame-size)))))
+
+
 (defun desktop:tree2list (&optional tree)
   "Convert `window-tree' to persistant list."
   (let ((tree (or tree (car (window-tree)))))
@@ -56,22 +72,7 @@
 	     (children (cddr tree))
 	     (child (car children)))
 	(list (if dir 'vertical 'horizontal)
-	      ;; compute window size
-	      (cond
-	       ;; child is a window and split is vertical
-	       ((and (windowp child) dir)
-		(/ (window-total-size child nil) (float (frame-height))))
-	       ;; child is a window and split is horizontal
-	       ((windowp child)
-		(/ (window-total-size child t) (float (frame-width))))
-	       ;; split is vertical (multi windows)
-	       (dir
-		(let ((edge (cadr child)))
-		  (/ (- (nth 2 edge) (car edge))  (float (frame-height)))))
-	       ;; split is horizontal (multi windows)
-	       (t
-		(let ((edge (cadr child)))
-		  (/ (- (nth 3 edge) (cadr edge)) (float (frame-width))))))
+	      (desktop:get-window-size child dir)
 	      (desktop:tree2list (car children))
 	      (if (> (length children) 2)
 		  (desktop:tree2list (cons dir (cons nil (cdr children))))
