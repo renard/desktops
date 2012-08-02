@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 17:11:53
+;; Last changed: 2012-08-02 17:22:06
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -17,11 +17,6 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-
-(defstruct desktop
-  name
-  tree
-  windows)
 
 (defstruct desktop-window
   buffer
