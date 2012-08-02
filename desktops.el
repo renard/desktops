@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 18:44:16
+;; Last changed: 2012-08-02 18:44:58
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -47,9 +47,9 @@
 percentage of the total frame size in DIR.
 
 If DIR is t the direction is horizontal, vertical otherwise."
-  (let ((frame-size (if dir  'frame-height  'frame-width))
-	(edge1 (if dir  'cadr 'car))
-	(edge2 (if dir  'cadddr 'caddr)))
+  (let ((frame-size (if dir 'frame-height 'frame-width))
+	(edge1 (if dir 'cadr 'car))
+	(edge2 (if dir 'cadddr 'caddr)))
     (/
      (if (windowp win)
 	 (window-total-size win (not dir))
