@@ -119,6 +119,43 @@ This allows the `selected-window' to be found using `nth' on a
 	 (remove* desktop-current desktop-alist :key 'car)
 	 (list (cons desktop-current (desktop:get-current))))))
 
+(defun desktop:create-new ()
+  "Create a new desktop"
+  (interactive)
+  (delete-other-windows)
+  (setf desktop-current (length desktop-alist))
+  (desktop:save-current))
+
+(defun desktop:prev ()
+  "Activate previous desktop."
+  (interactive)
+  (let ((prev (1- desktop-current)))
+    (when (< 0 prev)
+      (setf prev (1- (length desktop-alist))))
+    (desktop:save-current)
+    (desktop:restore prev)))
+
+(defun desktop:next ()
+  "Activate next desktop."
+  (interactive)
+  (let ((next (1+ desktop-current)))
+    (when (> next (1- (length desktop-alist)))
+      (setf next 0))
+    (desktop:save-current)
+    (desktop:restore next)))
+
+
+(defun desktop:display-current ()
+  (interactive)
+  (message
+   (mapconcat #'identity
+	      (loop for i in desktop-alist
+		    collect (let ((id (car i)))
+			      (if (= desktop-current id)
+				  (propertize (number-to-string id)
+					      'face 'font-lock-warning-face)
+				(number-to-string id))))
+	      " ")))
 
 (defun desktop:list2tree (conf)
   "Restore CONF."
@@ -147,7 +184,11 @@ This allows the `selected-window' to be found using `nth' on a
   (let ((desktop (cdr (assoc id desktop-alist))))
     (when desktop
       (delete-other-windows)
-      (desktop:list2tree (desktop-window-tree desktop)))))
+      (desktop:list2tree (desktop-window-tree desktop))
+      (setf desktop-current id)
+      (loop for b in (desktop-buffer-list desktop)
+	    do (bury-buffer (desktop-window-buffer b)))
+      (desktop:display-current))))
       
 
 (provide 'desktops)
