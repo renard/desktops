@@ -60,17 +60,21 @@ If DIR is t the direction is horizontal, vertical otherwise."
 	 (- (funcall edge2 edge) (funcall edge1 edge))))
      (float (funcall frame-size)))))
 
+(defun desktop:buffer-to-desktop-window (buffer &optional tree)
+  "Convert BUFFER to `desktop-window'."
+  (make-desktop-window :buffer buffer
+		       :buffer-name (buffer-name buffer)
+		       :file (buffer-file-name buffer)
+		       :start (window-start tree)
+		       :point (window-point tree)
+		       :mark (with-current-buffer buffer (mark))))
 
 (defun desktop:tree2list (&optional tree)
   "Convert `window-tree' to persistant list."
   (let ((tree (or tree (car (window-tree)))))
     (if (windowp tree)
 	(let ((buffer (window-buffer tree)))
-	  (make-desktop-window :buffer (buffer-name buffer)
-			       :file (buffer-file-name buffer)
-			       :start (window-start tree)
-			       :point (window-point tree)
-			       :mark (with-current-buffer buffer (mark))))
+	  (desktop:buffer-to-desktop-window buffer tree))
       (let* ((dir (car tree))
 	     (children (cddr tree))
 	     (child (car children)))
