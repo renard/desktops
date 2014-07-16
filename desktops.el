@@ -20,6 +20,7 @@
 
 (defstruct desktop-window
   buffer
+  buffer-name
   file
   start
   point
@@ -127,17 +128,12 @@ This allows the `selected-window' to be found using `nth' on a
         (select-window newwin)
         (desktop:list2tree (desktop-split-children conf)))
     ;; Restore window configuration
-    (message "C: %S" conf)
-    (let ((buffer (get-buffer (desktop-window-buffer conf))))
+    ;;(message "C: %S" conf)
+    (let ((buffer (get-buffer (desktop-window-buffer-name conf))))
       (when (buffer-live-p buffer)
 	(set-window-buffer nil buffer)
 	(set-window-start nil (desktop-window-start conf))
-	(set-window-point nil (desktop-window-point conf))))
-
-))
-
-
-
+	(set-window-point nil (desktop-window-point conf))))))
 
 (defun desktop:restore (id)
   "Restore desktop ID"
