@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2012-08-02 19:03:29
+;; Last changed: 2014-07-17 01:31:35
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -28,7 +28,8 @@
 
 (defstruct desktop
   window-tree
-  selected-window-path)
+  selected-window-path
+  buffer-list)
 
 (defstruct desktop-split
   dir
@@ -103,7 +104,9 @@ This allows the `selected-window' to be found using `nth' on a
   (make-desktop :window-tree (desktop:tree2list)
 		:selected-window-path (desktop:get-window-path
 				       (car (window-tree))
-				       (selected-window))))
+				       (selected-window))
+		:buffer-list (loop for b in (buffer-list)
+				   collect (desktop:buffer-to-desktop-window b))))
 
 (defun desktop:save-current()
   ""
