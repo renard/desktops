@@ -41,6 +41,10 @@
 (defvar desktop-current 0
   "Current desktop index")
 
+(defvar desktop-previous 0
+  "Previous desktop index")
+
+
 (defvar desktop-alist nil
   "desktop alist.")
 
@@ -190,6 +194,12 @@ This allows the `selected-window' to be found using `nth' on a
     (setq desktop-alist (desktop:vdelete desktop-alist current)))
   (desktop:display-current))
 
+(defun desktop:last ()
+  "Activate previous desktop."
+  (interactive)
+  (desktop:restore desktop-previous))
+
+
 (defun desktop:prev ()
   "Activate previous desktop."
   (interactive)
@@ -205,11 +215,16 @@ This allows the `selected-window' to be found using `nth' on a
   (message
    (mapconcat #'identity
 	      (loop for i below (length desktop-alist)
-		    collect (let ((name (desktop-name (desktop:get-by-id i))))
-			      (if (= desktop-current i)
-				  (propertize name
-					      'face 'font-lock-warning-face)
-			        name)))
+		    collect
+		    (let ((name (desktop-name (desktop:get-by-id i))))
+		      (when (= desktop-previous i)
+			(setf name
+			      (propertize name 'face
+					  'desktop-previous-face)))
+		      (when (= desktop-current i)
+			(setf name (propertize name 'face
+					       'desktop-current-face)))
+		      name))
 	      " ")))
 
 (defun desktop:list2tree (conf)
@@ -236,22 +251,35 @@ This allows the `selected-window' to be found using `nth' on a
 
 (defun desktop:restore (id)
   "Restore desktop ID"
-  (interactive "NRestore desktop number: ")
-  (let* ((id
-	  (cond
-	   ((>= id (length desktop-alist)) 0)
-	   ((< id 0) (1- (length desktop-alist)))
-	   (t id)))
-	 (desktop (desktop:get-by-id id)))
-    (when desktop
-      (desktop:save-current)
-      (delete-other-windows)
-      (desktop:list2tree (desktop-window-tree desktop))
-      (setf desktop-current id)
-      (loop for b in (desktop-buffer-list desktop)
-	    do (bury-buffer (get-buffer (desktop-window-buffer-name b))))
-      (desktop:display-current))))
-      
+  (when (/= id desktop-current)
+    (let* ((id
+	    (cond
+	     ((>= id (length desktop-alist)) 0)
+	     ((< id 0) (1- (length desktop-alist)))
+	     (t id)))
+	   (desktop (desktop:get-by-id id)))
+      (when desktop
+	(desktop:save-current)
+	(delete-other-windows)
+	(desktop:list2tree (desktop-window-tree desktop))
+	(setf desktop-previous desktop-current)
+	(setf desktop-current id)
+	(loop for b in (desktop-buffer-list desktop)
+	      do (bury-buffer (get-buffer (desktop-window-buffer-name b))))
+	(desktop:display-current)))))
+
+(defun desktop:switch-to (&optional name)
+  (interactive)
+  (let ((name (or (completing-read "Switch to buffer: "
+				   (loop for i across desktop-alist
+					 collect (desktop-name i))
+				   nil t
+				   (desktop-name
+				    (desktop:get-by-id desktop-previous))))))
+    (loop for i below (length desktop-alist)
+	  until (string= name (desktop-name (desktop:get-by-id i)))
+	  finally (desktop:restore i))))
+
 
 (provide 'desktops)
 
