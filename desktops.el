@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 02:19:27
+;; Last changed: 2014-07-17 10:29:06
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -44,6 +44,43 @@
 
 (defvar desktop-alist nil
   "desktop alist.")
+
+
+
+;; Helper function
+
+(defun desktop:vdelete(vector id)
+  "Delete element ID from VECTOR and return new vector. VECTOR is
+not modified."
+  (loop for i below (length vector)
+	unless (= i id)
+	collect (elt vector i) into nv
+	finally return (apply #'vector nv)))
+
+(defun desktop:vinsert (vector elt &optional id)
+  "Insert ELT into VECTOR at position ID and return new
+vector. VECTOR is not modified.
+
+If ID is out of VECTOR boundaries, ELT is either prepended or
+appended to VECTOR depending if ID is smaller or greater than
+VECTOR size.
+
+Id ID is nil ELT is appended to VECTOR.
+"
+  (cond
+   ((or (not id) (>= id (length vector)))
+    (vconcat v (if (vectorp elt) elt (vector elt))))
+   ((< id 0)
+    (vconcat (if (vectorp elt) elt (vector elt)) v))
+   (t
+    (loop for i below (length vector)
+	  if (= i id)
+	  nconc (list elt (elt vector i)) into nv
+	  else
+	  collect (elt vector i) into nv
+	  finally return (apply #'vector nv)))))
+
+
 
 
 (defun desktop:get-window-size (win dir)
