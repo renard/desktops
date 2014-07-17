@@ -147,21 +147,12 @@ This allows the `selected-window' to be found using `nth' on a
 (defun desktop:prev ()
   "Activate previous desktop."
   (interactive)
-  (let ((prev (1- desktop-current)))
-    (when (< 0 prev)
-      (setf prev (1- (length desktop-alist))))
-    (desktop:save-current)
-    (desktop:restore prev)))
+  (desktop:restore (1- desktop-current)))
 
 (defun desktop:next ()
   "Activate next desktop."
   (interactive)
-  (let ((next (1+ desktop-current)))
-    (when (> next (1- (length desktop-alist)))
-      (setf next 0))
-    (desktop:save-current)
-    (desktop:restore next)))
-
+  (desktop:restore (1+ desktop-current)))
 
 (defun desktop:display-current ()
   (interactive)
@@ -200,8 +191,15 @@ This allows the `selected-window' to be found using `nth' on a
 
 (defun desktop:restore (id)
   "Restore desktop ID"
-  (let ((desktop (cdr (assoc id desktop-alist))))
+  (interactive "NRestore desktop number: ")
+  (let* ((id
+	  (cond
+	   ((>= id (length desktop-alist)) 0)
+	   ((< id 0) (1- (length desktop-alist)))
+	   (t id)))
+	 (desktop (cdr (assoc id desktop-alist))))
     (when desktop
+      (desktop:save-current)
       (delete-other-windows)
       (desktop:list2tree (desktop-window-tree desktop))
       (setf desktop-current id)
