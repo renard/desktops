@@ -193,10 +193,9 @@ This allows the `selected-window' to be found using `nth' on a
   (interactive)
   (message
    (mapconcat #'identity
-	      (loop for i in desktop-alist
-		    collect (let* ((id (car i))
-				   (name (desktop-name (desktop:get-by-id id))))
-			      (if (= desktop-current id)
+	      (loop for i below (length desktop-alist)
+		    collect (let ((name (desktop-name (desktop:get-by-id i))))
+			      (if (= desktop-current i)
 				  (propertize name
 					      'face 'font-lock-warning-face)
 			        name)))
