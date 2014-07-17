@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 10:29:06
+;; Last changed: 2014-07-17 10:40:07
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -19,7 +19,6 @@
 (eval-when-compile (require 'cl))
 
 (defstruct desktop-window
-  buffer
   buffer-name
   file
   start
@@ -100,8 +99,7 @@ If DIR is t the direction is horizontal, vertical otherwise."
 
 (defun desktop:buffer-to-desktop-window (buffer &optional tree)
   "Convert BUFFER to `desktop-window'."
-  (make-desktop-window :buffer buffer
-		       :buffer-name (buffer-name buffer)
+  (make-desktop-window :buffer-name (buffer-name buffer)
 		       :file (buffer-file-name buffer)
 		       :start (window-start tree)
 		       :point (window-point tree)
@@ -241,7 +239,7 @@ This allows the `selected-window' to be found using `nth' on a
       (desktop:list2tree (desktop-window-tree desktop))
       (setf desktop-current id)
       (loop for b in (desktop-buffer-list desktop)
-	    do (bury-buffer (desktop-window-buffer b)))
+	    do (bury-buffer (get-buffer (desktop-window-buffer-name b))))
       (desktop:display-current))))
       
 
