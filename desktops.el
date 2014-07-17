@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 10:41:14
+;; Last changed: 2014-07-17 11:42:56
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -68,9 +68,9 @@ Id ID is nil ELT is appended to VECTOR.
 "
   (cond
    ((or (not id) (>= id (length vector)))
-    (vconcat v (if (vectorp elt) elt (vector elt))))
+    (vconcat vector (list elt)))
    ((< id 0)
-    (vconcat (if (vectorp elt) elt (vector elt)) v))
+    (vconcat (list elt) vector))
    (t
     (loop for i below (length vector)
 	  if (= i id)
@@ -139,9 +139,13 @@ This allows the `selected-window' to be found using `nth' on a
 	  when conf return conf
 	  finally return conf)))
 
-(defun desktop:get-current(name)
+(defun desktop:get-current(&optional name)
   "Return current desktop layout."
-  (make-desktop :name name	       
+  (make-desktop :name (or name
+			  (let ((desktop (desktop:get-by-id)))
+			    (when (desktop-p desktop)
+			      (desktop-name desktop)))
+			  (format "Desktop %s" desktop-current))
 		:window-tree (desktop:tree2list)
 		:selected-window-path (desktop:get-window-path
 				       (car (window-tree))
@@ -152,24 +156,22 @@ This allows the `selected-window' to be found using `nth' on a
 (defun desktop:get-by-id (&optional id)
   "Return desktop structure ID"
   (let ((id (or id desktop-current)))
-    (cdr (assoc id desktop-alist))))
+    (when (and (>= id 0) (< id (length desktop-alist)))
+      (elt desktop-alist id))))
 
 (defun desktop:rename(name)
+  "Rename current desktop to NAME."
   (interactive "MDesktop name: ")
   (desktop:save-current name)
   (message "Saved %s" name))
 
 (defun desktop:save-current(&optional name)
   ""
-  (let ((name (or name
-		  (desktop-name (desktop:get-by-id))
-		  (format "Desktop %s" desktop-current))))
-    (setq desktop-alist
-	  (sort
-	   (append
-	    (remove* desktop-current desktop-alist :key 'car)
-	    (list (cons desktop-current (desktop:get-current name))))
-	   (lambda (a b) (< (car a) (car b)))))))
+  (setq desktop-alist
+	(desktop:vinsert
+	 (desktop:vdelete desktop-alist desktop-current)
+	 (desktop:get-current name)
+	 desktop-current)))
 
 (defun desktop:create-new ()
   "Create a new desktop"
@@ -177,7 +179,16 @@ This allows the `selected-window' to be found using `nth' on a
   (desktop:save-current)
   (delete-other-windows)
   (setf desktop-current (length desktop-alist))
-  (desktop:save-current))
+  (desktop:save-current)
+  (desktop:display-current))
+
+(defun desktop:delete (&optional id)
+  "Delete desktop ID or current."
+  (interactive)
+  (let ((current desktop-current))
+    (desktop:prev)
+    (setq desktop-alist (desktop:vdelete desktop-alist current)))
+  (desktop:display-current))
 
 (defun desktop:prev ()
   "Activate previous desktop."
@@ -231,7 +242,7 @@ This allows the `selected-window' to be found using `nth' on a
 	   ((>= id (length desktop-alist)) 0)
 	   ((< id 0) (1- (length desktop-alist)))
 	   (t id)))
-	 (desktop (cdr (assoc id desktop-alist))))
+	 (desktop (desktop:get-by-id id)))
     (when desktop
       (desktop:save-current)
       (delete-other-windows)
