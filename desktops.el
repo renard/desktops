@@ -50,6 +50,10 @@
 
 
 
+(defface desktop-current-face '((t :foreground "#f57900")) "")
+(defface desktop-previous-face '((t :foreground "#8ae234")) "")
+
+
 ;; Helper function
 
 (defun desktop:vdelete(vector id)
