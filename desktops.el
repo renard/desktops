@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 10:40:07
+;; Last changed: 2014-07-17 10:41:14
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -18,20 +18,20 @@
 
 (eval-when-compile (require 'cl))
 
-(defstruct desktop-window
+(cl-defstruct desktop-window
   buffer-name
   file
   start
   point
   mark)
 
-(defstruct desktop
+(cl-defstruct desktop
   name
   window-tree
   selected-window-path
   buffer-list)
 
-(defstruct desktop-split
+(cl-defstruct desktop-split
   dir
   size
   child
