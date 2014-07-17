@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 11:42:56
+;; Last changed: 2014-07-17 13:27:05
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -50,10 +50,32 @@
 
 
 
+
+(defvar desktop-prefix-char "\C-\\")
+
+(defvar desktop-map nil
+  "*Keymap for escreen commands.")
+(cond
+ ((null desktop-map)
+  (setq desktop-map (make-sparse-keymap))
+  (define-key desktop-map desktop-prefix-char 'desktop:last)
+  (define-key desktop-map "c"    'desktop:create-new)
+  (define-key desktop-map "g"    'desktop:switch-to)
+  (define-key desktop-map "k"    'desktop:delete)
+  (define-key desktop-map "l"    'desktop:display-current)
+  (define-key desktop-map "r"    'desktop:rename)
+  (define-key desktop-map "n"    'desktop:next)
+  (define-key desktop-map "p"    'desktop:prev)))
+
+(global-set-key desktop-prefix-char 'desktop-prefix)
+(defalias 'desktop-prefix desktop-map)
+
+
 (defface desktop-current-face '((t :foreground "#f57900")) "")
 (defface desktop-previous-face '((t :foreground "#8ae234")) "")
 
 
+
 ;; Helper function
 
 (defun desktop:vdelete(vector id)
