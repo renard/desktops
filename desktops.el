@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 01:31:35
+;; Last changed: 2014-07-17 02:19:27
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -27,6 +27,7 @@
   mark)
 
 (defstruct desktop
+  name
   window-tree
   selected-window-path
   buffer-list)
@@ -103,25 +104,42 @@ This allows the `selected-window' to be found using `nth' on a
 	  when conf return conf
 	  finally return conf)))
 
-(defun desktop:get-current()
+(defun desktop:get-current(name)
   "Return current desktop layout."
-  (make-desktop :window-tree (desktop:tree2list)
+  (make-desktop :name name	       
+		:window-tree (desktop:tree2list)
 		:selected-window-path (desktop:get-window-path
 				       (car (window-tree))
 				       (selected-window))
 		:buffer-list (loop for b in (buffer-list)
 				   collect (desktop:buffer-to-desktop-window b))))
 
-(defun desktop:save-current()
+(defun desktop:get-by-id (&optional id)
+  "Return desktop structure ID"
+  (let ((id (or id desktop-current)))
+    (cdr (assoc id desktop-alist))))
+
+(defun desktop:rename(name)
+  (interactive "MDesktop name: ")
+  (desktop:save-current name)
+  (message "Saved %s" name))
+
+(defun desktop:save-current(&optional name)
   ""
-  (setq desktop-alist
-	(append
-	 (remove* desktop-current desktop-alist :key 'car)
-	 (list (cons desktop-current (desktop:get-current))))))
+  (let ((name (or name
+		  (desktop-name (desktop:get-by-id))
+		  (format "Desktop %s" desktop-current))))
+    (setq desktop-alist
+	  (sort
+	   (append
+	    (remove* desktop-current desktop-alist :key 'car)
+	    (list (cons desktop-current (desktop:get-current name))))
+	   (lambda (a b) (< (car a) (car b)))))))
 
 (defun desktop:create-new ()
   "Create a new desktop"
   (interactive)
+  (desktop:save-current)
   (delete-other-windows)
   (setf desktop-current (length desktop-alist))
   (desktop:save-current))
@@ -150,11 +168,12 @@ This allows the `selected-window' to be found using `nth' on a
   (message
    (mapconcat #'identity
 	      (loop for i in desktop-alist
-		    collect (let ((id (car i)))
+		    collect (let* ((id (car i))
+				   (name (desktop-name (desktop:get-by-id id))))
 			      (if (= desktop-current id)
-				  (propertize (number-to-string id)
+				  (propertize name
 					      'face 'font-lock-warning-face)
-				(number-to-string id))))
+			        name)))
 	      " ")))
 
 (defun desktop:list2tree (conf)
