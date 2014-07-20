@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-20 22:16:45
+;; Last changed: 2014-07-20 22:24:31
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -206,6 +206,7 @@ This allows the `selected-window' to be found using `nth' on a
 	 (desktop:get-current name)
 	 desktop-current)))
 
+;;;###autoload
 (defun desktop:create-new ()
   "Create a new desktop"
   (interactive)
@@ -215,6 +216,7 @@ This allows the `selected-window' to be found using `nth' on a
   (desktop:save-current)
   (desktop:display-current))
 
+;;;###autoload
 (defun desktop:delete (&optional id)
   "Delete desktop ID or current."
   (interactive)
@@ -223,17 +225,19 @@ This allows the `selected-window' to be found using `nth' on a
     (setq desktop-alist (desktop:vdelete desktop-alist current)))
   (desktop:display-current))
 
+;;;###autoload
 (defun desktop:last ()
   "Activate previous desktop."
   (interactive)
   (desktop:restore desktop-previous))
 
-
+;;;###autoload
 (defun desktop:prev ()
   "Activate previous desktop."
   (interactive)
   (desktop:restore (1- desktop-current)))
 
+;;;###autoload
 (defun desktop:next ()
   "Activate next desktop."
   (interactive)
@@ -327,7 +331,8 @@ This allows the `selected-window' to be found using `nth' on a
 	do (progn
 	     (find-file (desktop-window-file b))
 	     (rename-buffer (desktop-window-buffer-name b)))))
-  
+
+;;;###autoload
 (defun desktop:load-session ()
   (let ((plist (when (file-exists-p desktop-save-file)
 		 (with-temp-buffer
