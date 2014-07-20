@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-17 13:27:05
+;; Last changed: 2014-07-20 22:16:45
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -16,7 +16,9 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (require 'cl)
+  (require 'timer))
 
 (cl-defstruct desktop-window
   buffer-name
@@ -44,10 +46,11 @@
 (defvar desktop-previous 0
   "Previous desktop index")
 
-
 (defvar desktop-alist nil
   "desktop alist.")
 
+(defvar desktop-save-file "/tmp/desktop"
+  "Where to save desktop file")
 
 
 
@@ -306,6 +309,49 @@ This allows the `selected-window' to be found using `nth' on a
 	  until (string= name (desktop-name (desktop:get-by-id i)))
 	  finally (desktop:restore i))))
 
+
+(defun desktop:save-session ()
+  (interactive)
+  (with-temp-file desktop-save-file
+    (insert
+     ";; -*- emacs-lisp -*-\n"
+     ";; desktops saved sessions on " (format-time-string "%c") "\n"
+     ";; You should not modify this file, but you can safely remove it\n"
+     ";;\n\n"
+     (format "(:desktop-current %d :desktop-previous %d :desktop-alist %S)"
+	     desktop-current desktop-previous desktop-alist))))
+
+(defun desktop:lazy-load (buffer-to-load)
+  ""
+  (loop for b in buffer-to-load
+	do (progn
+	     (find-file (desktop-window-file b))
+	     (rename-buffer (desktop-window-buffer-name b)))))
+  
+(defun desktop:load-session ()
+  (let ((plist (when (file-exists-p desktop-save-file)
+		 (with-temp-buffer
+		   (insert-file-contents-literally desktop-save-file)
+		   (car (read-from-string (buffer-string))))))
+	buffer-to-load)
+    (when plist
+      (message "Reading session")
+      (setq
+       desktop-current (plist-get plist :desktop-current)
+       desktop-previous (plist-get plist :desktop-previous)
+       desktop-alist (plist-get plist :desktop-alist))
+
+      (loop for d across desktop-alist
+	    do (loop for b in (desktop-buffer-list d)
+		     do (when (desktop-window-file b)
+			  (unless (get-buffer (desktop-window-buffer-name b))
+			    (add-to-list 'buffer-to-load b)))))
+
+      (run-at-time 2 nil 'desktop:lazy-load buffer-to-load))))
+      
+				     
+				   
+      
 
 (provide 'desktops)
 
