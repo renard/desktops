@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-20 22:24:31
+;; Last changed: 2014-07-24 10:42:56
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -74,8 +74,12 @@
 (defalias 'desktop-prefix desktop-map)
 
 
-(defface desktop-current-face '((t :foreground "#f57900")) "")
-(defface desktop-previous-face '((t :foreground "#8ae234")) "")
+(defface desktop-current-face '((t :foreground "#edd400"
+				   :weight 'ultra-bold
+				   :underline t)) "")
+(defface desktop-previous-face '((t :foreground "#729fcf")) "")
+(defface desktop-other-face '((t :foreground "#888a85"
+				 :weight 'light)) "")
 
 
 
@@ -249,15 +253,13 @@ This allows the `selected-window' to be found using `nth' on a
    (mapconcat #'identity
 	      (loop for i below (length desktop-alist)
 		    collect
-		    (let ((name (desktop-name (desktop:get-by-id i))))
-		      (when (= desktop-previous i)
-			(setf name
-			      (propertize name 'face
-					  'desktop-previous-face)))
-		      (when (= desktop-current i)
-			(setf name (propertize name 'face
-					       'desktop-current-face)))
-		      name))
+		    (let ((face
+			   (cond
+			    ((= desktop-previous i) 'desktop-previous-face)
+			    ((= desktop-current i) 'desktop-current-face)
+			    (t 'desktop-other-face))))
+		      (propertize (desktop-name (desktop:get-by-id i))
+				  'face face)))
 	      " ")))
 
 (defun desktop:list2tree (conf)
