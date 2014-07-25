@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-24 10:42:56
+;; Last changed: 2014-07-25 15:14:10
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -75,11 +75,11 @@
 
 
 (defface desktop-current-face '((t :foreground "#edd400"
-				   :weight 'ultra-bold
+				   :weight ultra-bold
 				   :underline t)) "")
 (defface desktop-previous-face '((t :foreground "#729fcf")) "")
 (defface desktop-other-face '((t :foreground "#888a85"
-				 :weight 'light)) "")
+				 :weight light)) "")
 
 
 
