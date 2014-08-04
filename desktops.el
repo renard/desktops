@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-07-31
-;; Last changed: 2014-07-25 15:14:10
+;; Last changed: 2014-08-04 12:05:15
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -51,6 +51,10 @@
 
 (defvar desktop-save-file "/tmp/desktop"
   "Where to save desktop file")
+
+(defvar desktop-default-buffer "*Scratch*"
+  "Default buffer when creating a new desktop.")
+
 
 
 
@@ -217,6 +221,7 @@ This allows the `selected-window' to be found using `nth' on a
   (desktop:save-current)
   (delete-other-windows)
   (setf desktop-current (length desktop-alist))
+  (switch-to-buffer (get-buffer-create desktop-default-buffer))
   (desktop:save-current)
   (desktop:display-current))
 
