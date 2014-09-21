@@ -310,7 +310,8 @@ This allows the `selected-window' to be found using `nth' on a
 
 (defun desktop:switch-to (&optional name)
   (interactive)
-  (let ((name (or (completing-read "Switch to buffer: "
+  (let ((name (or name
+		  (completing-read "Switch to buffer: "
 				   (loop for i across desktop-alist
 					 collect (desktop-name i))
 				   nil t
